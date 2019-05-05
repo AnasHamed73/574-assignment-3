@@ -118,19 +118,24 @@ def blrObjFunction(initialWeights, *args):
     # YOUR CODE HERE #
     ##################
     # HINT: Do not forget to add the bias term to your input data
-    data_bias = np.ones((train_data.shape[0],1))
-    train_data_bias = np.concatenate((data_bias,train_data),axis=1)
-    y_n = train_label.T
-    w_k = initialWeights
-    WtX = (np.dot(w_k.T,train_data_bias.T)).T
-    theta_n = sigmoid(WtX)
-    first_term = np.dot(y_n,np.log(theta_n))
-    second_term = np.dot(np.array(1-y_n),np.log(np.array(1-theta_n)))
-    logrithm_term = first_term + second_term
-    error = -1*(logrithm_term)/n_data
+    w = initialWeights.reshape((n_features + 1), 1)  # adding bias term
+    # print(train_data.shape)
+    x = np.insert(train_data, 0, np.ones((1, n_data)), 1)
+    # print('fake x ',x.shape)
+    # x = np.hstack((np.ones((n_data, 1)), train_data))
+    # print('real x',x.shape)
 
-    sum_term = np.dot((np.array(theta_n - train_label)).T,train_data_bias)
-    error_grad = sum_term/n_data
+    thetai = sigmoid(np.matmul(x, w))
+
+    y = labeli
+
+    error = y * np.log(thetai) + (1.0 - y) * np.log(1.0 - thetai)
+    error = (-np.sum(error)) / n_data
+
+    # print(error)
+    # error_grad = (thetai - labeli) * x
+    error_grad = np.sum((thetai - labeli) * x, axis=0)
+    error_grad = np.divide(error_grad, n_data)
 
     return error, error_grad
 
@@ -156,6 +161,30 @@ def blrPredict(W, data):
     # YOUR CODE HERE #
     ##################
     # HINT: Do not forget to add the bias term to your input data
+    n_data = data.shape[0]
+    n_feature = data.shape[1]
+
+    W = W.reshape(n_feature + 1, n_class)
+
+    # x = np.hstack((np.ones((n_data, 1)), data))
+
+    x = np.insert(data, 0, np.ones((1, n_data)), 1)
+
+    bb = np.ones((n_data, n_class))
+    aa = np.ones((n_data, n_class))
+    theta = np.subtract(bb, aa)
+
+    for m in range(n_class):
+        theta[:, m] = np.exp(np.matmul(W.T[m, :], x.T))
+
+    sum = np.sum(theta, 1)
+
+    for m in range(n_class):
+        theta[:, m] = theta[:, m] / sum
+
+    label = np.argmax(theta, axis=1)  # max for classes
+
+    label = label.reshape((n_data, 1))
 
 
     return label
