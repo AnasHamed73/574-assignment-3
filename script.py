@@ -163,7 +163,6 @@ def blrPredict(W, data):
     # YOUR CODE HERE #
     ##################
     # HINT: Do not forget to add the bias term to your input data
-    n_data = data.shape[0]
     n_feature = data.shape[1]
 
     W = W.reshape(n_feature + 1, n_class)
@@ -243,6 +242,7 @@ def mlrPredict(W, data):
     # YOUR CODE HERE #
     ##################
     # HINT: Do not forget to add the bias term to your input data
+    
 
     return label
 
