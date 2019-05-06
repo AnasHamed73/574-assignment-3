@@ -87,7 +87,28 @@ def preprocess():
     validation_data /= 255.0
     test_data /= 255.0
 
-    return train_data, train_label, validation_data, validation_label, test_data, test_label
+
+
+
+    sub_size = 10000
+    train_subset = np.zeros((sub_size, train_data.shape[1]))
+    train_subset_label = np.zeros((sub_size, train_label.shape[1]))
+    
+    indices = []
+    
+    for i in range(n_train):
+        indices.append(i)
+    
+    random.shuffle(indices)
+    
+    for i in range(sub_size):
+        train_subset[i, :] = train_data[indices[i], :]
+        train_subset_label[i, :] = train_label[indices[i], :]
+
+
+
+    return train_subset, train_subset_label, validation_data, validation_label, test_data, test_label
+   # return train_data, train_label, validation_data, validation_label, test_data, test_label
 
 
 def sigmoid(z):
@@ -190,6 +211,30 @@ def blrPredict(W, data):
 
     return label
 
+
+def posterior(wk, xi, w):
+    #wk: D+1x1
+    #xi: 1xD
+    #w: D+1x10
+   #     ('wk shape: ', (716,))
+   # ('xi shape: ', (50000, 716))
+   # ('w shape: ', (716, 10))
+   # ('e shape: ', (50000,))
+   # ('es shape: ', (50000,))
+
+    #print("wk shape: ", np.shape(wk))
+    #print("xi shape: ", np.shape(xi))
+    #print("w shape: ", np.shape(w))
+    e = np.dot(xi, wk) #1x1
+    es = 0
+    for i in range(w.shape[1]):
+        es += np.dot(xi, w[:, i])
+    #print("e shape: ", np.shape(e))
+    #print("es shape: ", np.shape(e))
+    return e / es
+
+
+
 def mlrObjFunction(params, *args):
     """
         mlrObjFunction computes multi-class Logistic Regression error function and
@@ -206,40 +251,109 @@ def mlrObjFunction(params, *args):
         error_grad: the vector of size (D+1) x 10 representing the gradient of
         error function
         """
-    train_data, Y = args
+    train_data, labeli = args
     n_data = train_data.shape[0]
     n_feature = train_data.shape[1]
     error = 0
     error_grad = np.zeros((n_feature + 1, n_class))
+    initialWeights_b = params.reshape(n_feature + 1, 10)
+    #print(initialWeights_b)
     ##################
     # YOUR CODE HERE #
     ##################
     # HINT: Do not forget to add the bias term to your input data
-    data_bias = np.ones((train_data.shape[0],1))
+    data_bias = np.ones((n_data,1))
     train_data_bias = np.concatenate((data_bias,train_data),axis=1)
     
     #w_t = initialWeights_b.T
     #x_t = train_data_bias.T
-    denominator = np.matrix(np.sum(np.exp(np.dot(train_data_bias, initialWeights_b)),axis=0))
-    numerator = np.exp(np.dot(train_data_bias, initialWeights_b))
-    theta_nk = np.divide(numerator,denominator)
-    
-    error_matrix = np.multiply(Y,np.log(theta_nk))
-    error_row_sum = np.sum(error_matrix,axis=0)
+
+    #error = 0 
+    #for i in range(n_data):
+    #    for j in range(n_class):
+    #        pos = posterior(initialWeights_b[:, j], train_data_bias[i, :], initialWeights_b)
+    #        error += np.dot(labeli[i, j], np.log(pos))
+
+    wTx = np.exp(np.dot(train_data_bias, initialWeights_b))
+    #denominator = np.array(np.sum(wTx,axis=0))
+    denominator = np.array(np.sum(wTx, axis = 1))
+    numerator = np.array(wTx)
+   # print("numerator: ", numerator)
+   # print("den: ", denominator)
+    #theta_nk = np.divide(numerator,denominator)
+    theta_nk = np.zeros((n_data, n_class))
+    for i in range(numerator.shape[0]):
+        theta_nk[i, :] = np.divide(numerator[i, :], denominator[i])
+    #theta_nk = np.divide(numerator,denominator)
+
+
+
+   # print("theta_nk: ", theta_nk.shape)
+    #
+    error_matrix = np.multiply(labeli, np.log(theta_nk))
+    error_row_sum = np.sum(error_matrix, axis=0)
     error_sum = np.sum(error_row_sum)
     error = -error_sum
+    #
+    #theta_nk: NxK
+    #X: NxD
+    first_term = theta_nk - labeli
+    #
+
+    error_grad = np.dot(train_data_bias.T, first_term)
+
+
+    #for i in range(n_data):
+    #    if i % 10000 == 0:
+    #      print("itr: ", i)
+    #    error_grad = np.add(error_grad, np.dot(np.matrix(train_data_bias[i, :]).T, np.matrix(np.subtract(theta_nk, Y)[i, :])))
+
+
+
+
+  #  
+  #  #for k in range(10):
+  #  #    k_column = first_term[:,k]
+  #  #    k_product = np.multiply(k_column,train_data_bias)
+  #  #    k_sum = np.sum(k_product,axis=0)
+  #  #    error_grad =np.concatenate(k_sum,axis=1)
+
+
+
+
+
+#    error = 0
+#    error_grad = np.zeros_like(initialWeights_b)
+#    dim, num_train = train_data_bias.shape
+#
+#    scores = initialWeights_b.T.dot(train_data_bias.T) # [K, N]
+#    # Shift scores so that the highest value is 0
+#    scores -= np.max(scores)
+#    scores_exp = np.exp(scores)
+#    #correct_scores_exp = scores_exp[labeli, xrange(num_train)] # [N, ]
+#    
+#    correct_scores_exp = np.argmax(labeli, axis = 1)
+#
+#    scores_exp_sum = np.sum(scores_exp, axis=0) # [N, ]
+#    loss = -np.sum(np.log(correct_scores_exp / scores_exp_sum))
+#    loss /= n_data 
+#    #loss += 0.5 * reg * np.sum(W * W)
+#    error = loss
+#
+#    scores_exp_normalized = scores_exp / scores_exp_sum
+#    # deal with the correct class
+#    for i in range(scores_exp_normalized.shape[0]):
+#      for j in range(scores_exp_normalized.shape[1]):
+#         scores_exp_normalized[i, j] -= 1
+#    #scores_exp_normalized[y, xrange(num_train)] -= 1 # [K, N]
+#    grad = train_data_bias.T.dot(scores_exp_normalized.T)
+#    grad /= num_train
+#    #grad += reg * W
+#    error_grad = grad
+
+    print("error: ", error)
     
-    first_term = theta_nk - Y
-    
-    error_grad = np.matrix(np.dot(train_data_bias.T,first_term))
-    
-    #for k in range(10):
-    #    k_column = first_term[:,k]
-    #    k_product = np.multiply(k_column,train_data_bias)
-    #    k_sum = np.sum(k_product,axis=0)
-    #    error_grad =np.concatenate(k_sum,axis=1)
-    
-    return error, error_grad
+    return error, np.array(error_grad).T.flatten()
 
 
 def mlrPredict(W, data):
@@ -258,24 +372,29 @@ def mlrPredict(W, data):
         
         """
     label = np.zeros((data.shape[0], 1))
+
+    #print(W)
     
     ##################
     # YOUR CODE HERE #
     ##################
     # HINT: Do not forget to add the bias term to your input data
-    n_data = train_data.shape(0)
-    data_bias = np.ones((train_data.shape[0],1))
-    train_data_bias = np.concatenate((data_bias,train_data),axis=1)
-    numerator = np.exp(np.dot(train_data_bias, initialWeights_b))
-    denominator = np.sum(np.exp(np.dot(train_data_bias, initialWeights_b)),axis=0)
+    #n_data = train_data.shape[0]
+    n_data = data.shape[0]
+    data_bias = np.ones((data.shape[0],1))
+    train_data_bias = np.concatenate((data_bias,data),axis=1)
+    numerator = np.exp(np.dot(train_data_bias, W))
+    denominator = np.sum(np.exp(np.dot(train_data_bias, W)),axis=0)
     y_k = np.divide(numerator,denominator)
     
     for i in range(n_data):
-        row_max = 0
-        for j in range(10):
-            if y_k[i,j] > row_max:
-                row_max = j
-        label[i,1] = row_max
+        #print("-----------------------y_k: ", y_k[i, :])
+        #row_max = 0
+        #for j in range(10):
+        #    if y_k[i,j] > row_max:
+        #        row_max = j
+        #label[i,0] = row_max
+        label[i, 0] = np.argmax(y_k[i])
     return label
 
 
@@ -375,7 +494,7 @@ n_train = train_data.shape[0]
 # number of features
 n_feature = train_data.shape[1]
 
-Y = np.zeros((n_train, n_class))
+Y = np.zeros((n_train, n_class), dtype = np.int8)
 for i in range(n_class):
     Y[:, i] = (train_label == i).astype(int).ravel()
 
@@ -412,9 +531,9 @@ print('\n\n--------------SVM-------------------\n\n')
 #svm_param_experiment(train_data, train_label, validation_data, validation_label, test_data, test_label)
 
 # output saved in 'svm_full_train_set.log' file
-clf = SVC(kernel = 'rbf', gamma = 'auto', C = 30)
-clf.fit(train_data, train_label.ravel()) 
-predict_and_print_acc(clf, train_data, train_label, validation_data, validation_label, test_data, test_label)
+#clf = SVC(kernel = 'rbf', gamma = 'auto', C = 30)
+#clf.fit(train_data, train_label.ravel()) 
+#predict_and_print_acc(clf, train_data, train_label, validation_data, validation_label, test_data, test_label)
 
 """
 Script for Extra Credit Part
@@ -427,13 +546,16 @@ opts_b = {'maxiter': 100}
 args_b = (train_data, Y)
 nn_params = minimize(mlrObjFunction, initialWeights_b, jac=True, args=args_b, method='CG', options=opts_b)
 W_b = nn_params.x.reshape((n_feature + 1, n_class))
+#print(W_b)
 
 # Find the accuracy on Training Dataset
 predicted_label_b = mlrPredict(W_b, train_data)
+#print(train_label)
 print('\n Training set Accuracy:' + str(100 * np.mean((predicted_label_b == train_label).astype(float))) + '%')
 
 # Find the accuracy on Validation Dataset
 predicted_label_b = mlrPredict(W_b, validation_data)
+#print(validation_label)
 print('\n Validation set Accuracy:' + str(100 * np.mean((predicted_label_b == validation_label).astype(float))) + '%')
 
 # Find the accuracy on Testing Dataset
