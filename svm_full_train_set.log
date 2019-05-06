@@ -1,0 +1,12 @@
+
+
+--------------SVM-------------------
+
+
+************ Radial Basis Function gamma = default and C = 30
+
+ Training set Accuracy:98.372%
+
+ Validation set Accuracy:97.1%
+
+ Test set Accuracy:97.04%

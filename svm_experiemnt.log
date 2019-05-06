@@ -1,0 +1,104 @@
+
+
+--------------SVM-------------------
+
+
+Starting experiment...
+************ Linear kernel
+
+ SVM Training set Accuracy:99.63%
+
+ SVM Validation set Accuracy:91.97999999999999%
+
+ SVM Test set Accuracy:92.08%
+************ Radial Basis Function gamma = 1
+
+ SVM Training set Accuracy:100.0%
+
+ SVM Validation set Accuracy:17.49%
+
+ SVM Test set Accuracy:19.38%
+************ Radial Basis Function gamma = default
+
+ SVM Training set Accuracy:92.23%
+
+ SVM Validation set Accuracy:91.91%
+
+ SVM Test set Accuracy:92.55%
+************ Radial Basis Function gamma = default and C = 1
+
+ SVM Training set Accuracy:92.73%
+
+ SVM Validation set Accuracy:91.91%
+
+ SVM Test set Accuracy:92.4%
+************ Radial Basis Function gamma = default and C = 10
+
+ SVM Training set Accuracy:96.44%
+
+ SVM Validation set Accuracy:94.19%
+
+ SVM Test set Accuracy:94.51%
+************ Radial Basis Function gamma = default and C = 20
+
+ SVM Training set Accuracy:97.86%
+
+ SVM Validation set Accuracy:94.52000000000001%
+
+ SVM Test set Accuracy:94.89%
+************ Radial Basis Function gamma = default and C = 30
+
+ SVM Training set Accuracy:98.56%
+
+ SVM Validation set Accuracy:94.6%
+
+ SVM Test set Accuracy:95.00999999999999%
+************ Radial Basis Function gamma = default and C = 40
+
+ SVM Training set Accuracy:98.92%
+
+ SVM Validation set Accuracy:94.57%
+
+ SVM Test set Accuracy:95.0%
+************ Radial Basis Function gamma = default and C = 50
+
+ SVM Training set Accuracy:99.21%
+
+ SVM Validation set Accuracy:94.53%
+
+ SVM Test set Accuracy:95.12%
+************ Radial Basis Function gamma = default and C = 60
+
+ SVM Training set Accuracy:99.48%
+
+ SVM Validation set Accuracy:94.51%
+
+ SVM Test set Accuracy:95.14%
+************ Radial Basis Function gamma = default and C = 70
+
+ SVM Training set Accuracy:99.57000000000001%
+
+ SVM Validation set Accuracy:94.54%
+
+ SVM Test set Accuracy:95.12%
+************ Radial Basis Function gamma = default and C = 80
+
+ SVM Training set Accuracy:99.66000000000001%
+
+ SVM Validation set Accuracy:94.56%
+
+ SVM Test set Accuracy:95.17%
+************ Radial Basis Function gamma = default and C = 90
+
+ SVM Training set Accuracy:99.69%
+
+ SVM Validation set Accuracy:94.53%
+
+ SVM Test set Accuracy:95.22%
+************ Radial Basis Function gamma = default and C = 100
+
+ SVM Training set Accuracy:99.77000000000001%
+
+ SVM Validation set Accuracy:94.51%
+
+ SVM Test set Accuracy:95.17%

@@ -1,9 +1,11 @@
 import numpy as np
 from scipy.io import loadmat
 from scipy.optimize import minimize
-from sklearn import svm
 import matplotlib.pyplot as plt
 import math
+from sklearn.svm import SVC
+import matplotlib.gridspec as gridspec
+import random
 
 
 def preprocess():
@@ -245,6 +247,88 @@ def mlrPredict(W, data):
     return label
 
 
+def predict_and_print_acc(clf, train_data, train_label, val_data, val_label, test_data, test_label):
+  train_pred = clf.predict(train_data)
+  train_acc = 100 * np.mean((train_pred == train_label.T).astype(float))
+  print('\n Training set Accuracy:' + str(train_acc) + '%')
+  val_pred = clf.predict(val_data)
+  val_acc = 100 * np.mean((val_pred == val_label.T).astype(float))
+  print('\n Validation set Accuracy:' + str(val_acc) + '%')
+  test_pred = clf.predict(test_data)
+  test_acc = 100 * np.mean((test_pred == test_label.T).astype(float))
+  print('\n Test set Accuracy:' + str(test_acc) + '%')
+  return train_acc, val_acc, test_acc
+
+
+def svm_param_experiment(train_data, train_label, val_data, val_label, test_data, test_label):
+  print("Starting experiment...")
+  sub_size = 10000
+  train_subset = np.zeros((sub_size, train_data.shape[1]))
+  train_subset_label = np.zeros((sub_size, train_label.shape[1]))
+  
+  indices = []
+  
+  for i in range(n_train):
+      indices.append(i)
+  
+  random.shuffle(indices)
+  
+  for i in range(sub_size):
+      train_subset[i, :] = train_data[indices[i], :]
+      train_subset_label[i, :] = train_label[indices[i], :]
+  
+  print("************ Linear kernel")
+  clf = SVC(kernel = 'linear')
+  clf.fit(train_subset, train_subset_label.ravel()) 
+  predict_and_print_acc(clf, train_subset, train_subset_label, validation_data, validation_label, test_data, test_label)
+  
+  print("************ Radial Basis Function gamma = 1")
+  clf = SVC(kernel = 'rbf', gamma = 1.0)
+  clf.fit(train_subset, train_subset_label.ravel()) 
+  predict_and_print_acc(clf, train_subset, train_subset_label, validation_data, validation_label, test_data, test_label)
+  
+  print("************ Radial Basis Function gamma = default")
+  clf = SVC(kernel = 'rbf', gamma = 'auto')
+  clf.fit(train_subset, train_subset_label.ravel()) 
+  predict_and_print_acc(clf, train_subset, train_subset_label, validation_data, validation_label, test_data, test_label)
+  
+  train_acc_vals = []
+  val_acc_vals = []
+  test_acc_vals = []
+  
+  print("************ Radial Basis Function gamma = default and C = 1")
+  clf = SVC(kernel = 'rbf', gamma = 'auto', C = 1)
+  clf.fit(train_subset, train_subset_label.ravel()) 
+  train_acc, val_acc, test_acc = predict_and_print_acc(clf, train_subset, train_subset_label, validation_data, validation_label, test_data, test_label)
+  train_acc_vals.append(train_acc)
+  val_acc_vals.append(val_acc)
+  test_acc_vals.append(test_acc)
+  
+  for i in range(10, 110, 10):
+    print("************ Radial Basis Function gamma = default and C = " + str(i))
+    clf = SVC(kernel = 'rbf', gamma = 'auto', C = i)
+    clf.fit(train_subset, train_subset_label.ravel()) 
+    train_acc, val_acc, test_acc = predict_and_print_acc(clf, train_subset, train_subset_label, validation_data, validation_label, test_data, test_label)
+    train_acc_vals.append(train_acc)
+    val_acc_vals.append(val_acc)
+    test_acc_vals.append(test_acc)
+    
+  plt.xlabel("C")
+  plt.ylabel("Accuracy (%)")
+  cases = [1]
+  cases.extend(range(10, 110, 10))
+  
+  plt.plot(np.array(cases), np.array(train_acc_vals), 'r')
+  plt.plot(np.array(cases), np.array(val_acc_vals), 'g')
+  plt.plot(np.array(cases), np.array(test_acc_vals), 'b')
+  
+  plt.xticks(cases, cases)
+  plt.legend(["Training", "Validation", "Test"])
+   
+  plt.savefig("svm_varC.png")
+  plt.show()
+
+
 """
 Script for Logistic Regression
 """
@@ -267,33 +351,38 @@ for i in range(n_class):
 W = np.zeros((n_feature + 1, n_class))
 initialWeights = np.zeros((n_feature + 1, 1))
 opts = {'maxiter': 100}
-for i in range(n_class):
-    labeli = Y[:, i].reshape(n_train, 1)
-    args = (train_data, labeli)
-    nn_params = minimize(blrObjFunction, initialWeights, jac=True, args=args, method='CG', options=opts)
-    W[:, i] = nn_params.x.reshape((n_feature + 1,))
-
-# Find the accuracy on Training Dataset
-predicted_label = blrPredict(W, train_data)
-print('\n Training set Accuracy:' + str(100 * np.mean((predicted_label == train_label).astype(float))) + '%')
-
-# Find the accuracy on Validation Dataset
-predicted_label = blrPredict(W, validation_data)
-print('\n Validation set Accuracy:' + str(100 * np.mean((predicted_label == validation_label).astype(float))) + '%')
-
-# Find the accuracy on Testing Dataset
-predicted_label = blrPredict(W, test_data)
-print('\n Testing set Accuracy:' + str(100 * np.mean((predicted_label == test_label).astype(float))) + '%')
+#for i in range(n_class):
+#    labeli = Y[:, i].reshape(n_train, 1)
+#    args = (train_data, labeli)
+#    nn_params = minimize(blrObjFunction, initialWeights, jac=True, args=args, method='CG', options=opts)
+#    W[:, i] = nn_params.x.reshape((n_feature + 1,))
+#
+## Find the accuracy on Training Dataset
+#predicted_label = blrPredict(W, train_data)
+#print('\n Training set Accuracy:' + str(100 * np.mean((predicted_label == train_label).astype(float))) + '%')
+#
+## Find the accuracy on Validation Dataset
+#predicted_label = blrPredict(W, validation_data)
+#print('\n Validation set Accuracy:' + str(100 * np.mean((predicted_label == validation_label).astype(float))) + '%')
+#
+## Find the accuracy on Testing Dataset
+#predicted_label = blrPredict(W, test_data)
+#print('\n Testing set Accuracy:' + str(100 * np.mean((predicted_label == test_label).astype(float))) + '%')
 
 """
 Script for Support Vector Machine
 """
 
 print('\n\n--------------SVM-------------------\n\n')
-##################
-# YOUR CODE HERE #
-##################
 
+# uncomment to run experiment where the best value for C was determined
+# OR read the 'svm_experiemnt.log' file to see the output
+#svm_param_experiment(train_data, train_label, validation_data, validation_label, test_data, test_label)
+
+# output saved in 'svm_full_train_set.log' file
+clf = SVC(kernel = 'rbf', gamma = 'auto', C = 30)
+clf.fit(train_data, train_label.ravel()) 
+predict_and_print_acc(clf, train_data, train_label, validation_data, validation_label, test_data, test_label)
 
 """
 Script for Extra Credit Part

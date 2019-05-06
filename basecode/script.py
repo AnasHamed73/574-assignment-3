@@ -104,7 +104,9 @@ def blrObjFunction(initialWeights, *args):
         error: the scalar value of error function of 2-class logistic regression
         error_grad: the vector of size (D+1) x 1 representing the gradient of
                     error function
-    """
+     """
+    # train data shape: NxD
+    # labeli shape: Nx1
     train_data, labeli = args
 
     n_data = train_data.shape[0]
