@@ -192,58 +192,90 @@ def blrPredict(W, data):
 
 def mlrObjFunction(params, *args):
     """
-    mlrObjFunction computes multi-class Logistic Regression error function and
-    its gradient.
-
-    Input:
+        mlrObjFunction computes multi-class Logistic Regression error function and
+        its gradient.
+        
+        Input:
         initialWeights_b: the weight vector of size (D + 1) x 10
         train_data: the data matrix of size N x D
         labeli: the label vector of size N x 1 where each entry can be either 0 or 1
-                representing the label of corresponding feature vector
-
-    Output:
+        representing the label of corresponding feature vector
+        
+        Output:
         error: the scalar value of error function of multi-class logistic regression
         error_grad: the vector of size (D+1) x 10 representing the gradient of
-                    error function
-    """
-    train_data, labeli = args
+        error function
+        """
+    train_data, Y = args
     n_data = train_data.shape[0]
     n_feature = train_data.shape[1]
     error = 0
     error_grad = np.zeros((n_feature + 1, n_class))
-
     ##################
     # YOUR CODE HERE #
     ##################
     # HINT: Do not forget to add the bias term to your input data
-
-
+    data_bias = np.ones((train_data.shape[0],1))
+    train_data_bias = np.concatenate((data_bias,train_data),axis=1)
+    
+    #w_t = initialWeights_b.T
+    #x_t = train_data_bias.T
+    denominator = np.matrix(np.sum(np.exp(np.dot(train_data_bias, initialWeights_b)),axis=0))
+    numerator = np.exp(np.dot(train_data_bias, initialWeights_b))
+    theta_nk = np.divide(numerator,denominator)
+    
+    error_matrix = np.multiply(Y,np.log(theta_nk))
+    error_row_sum = np.sum(error_matrix,axis=0)
+    error_sum = np.sum(error_row_sum)
+    error = -error_sum
+    
+    first_term = theta_nk - Y
+    
+    error_grad = np.matrix(np.dot(train_data_bias.T,first_term))
+    
+    #for k in range(10):
+    #    k_column = first_term[:,k]
+    #    k_product = np.multiply(k_column,train_data_bias)
+    #    k_sum = np.sum(k_product,axis=0)
+    #    error_grad =np.concatenate(k_sum,axis=1)
+    
     return error, error_grad
 
 
 def mlrPredict(W, data):
     """
-     mlrObjFunction predicts the label of data given the data and parameter W
-     of Logistic Regression
-
-     Input:
-         W: the matrix of weight of size (D + 1) x 10. Each column is the weight
-         vector of a Logistic Regression classifier.
-         X: the data matrix of size N x D
-
-     Output:
-         label: vector of size N x 1 representing the predicted label of
-         corresponding feature vector given in data matrix
-
-    """
+        mlrObjFunction predicts the label of data given the data and parameter W
+        of Logistic Regression
+        
+        Input:
+        W: the matrix of weight of size (D + 1) x 10. Each column is the weight
+        vector of a Logistic Regression classifier.
+        X: the data matrix of size N x D
+        
+        Output:
+        label: vector of size N x 1 representing the predicted label of
+        corresponding feature vector given in data matrix
+        
+        """
     label = np.zeros((data.shape[0], 1))
-
+    
     ##################
     # YOUR CODE HERE #
     ##################
     # HINT: Do not forget to add the bias term to your input data
+    n_data = train_data.shape(0)
+    data_bias = np.ones((train_data.shape[0],1))
+    train_data_bias = np.concatenate((data_bias,train_data),axis=1)
+    numerator = np.exp(np.dot(train_data_bias, initialWeights_b))
+    denominator = np.sum(np.exp(np.dot(train_data_bias, initialWeights_b)),axis=0)
+    y_k = np.divide(numerator,denominator)
     
-
+    for i in range(n_data):
+        row_max = 0
+        for j in range(10):
+            if y_k[i,j] > row_max:
+                row_max = j
+        label[i,1] = row_max
     return label
 
 
