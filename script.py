@@ -108,7 +108,7 @@ def preprocess():
 
 
     return train_subset, train_subset_label, validation_data, validation_label, test_data, test_label
-   # return train_data, train_label, validation_data, validation_label, test_data, test_label
+    #return train_data, train_label, validation_data, validation_label, test_data, test_label
 
 
 def sigmoid(z):
@@ -298,11 +298,10 @@ def mlrObjFunction(params, *args):
     #theta_nk: NxK
     #X: NxD
     first_term = theta_nk - labeli
-    #
 
     error_grad = np.dot(train_data_bias.T, first_term)
 
-
+    print(error_grad)
     #for i in range(n_data):
     #    if i % 10000 == 0:
     #      print("itr: ", i)
@@ -353,7 +352,7 @@ def mlrObjFunction(params, *args):
 
     print("error: ", error)
     
-    return error, np.array(error_grad).T.flatten()
+    return error, np.array(error_grad).flatten()
 
 
 def mlrPredict(W, data):
@@ -383,9 +382,13 @@ def mlrPredict(W, data):
     n_data = data.shape[0]
     data_bias = np.ones((data.shape[0],1))
     train_data_bias = np.concatenate((data_bias,data),axis=1)
-    numerator = np.exp(np.dot(train_data_bias, W))
-    denominator = np.sum(np.exp(np.dot(train_data_bias, W)),axis=0)
-    y_k = np.divide(numerator,denominator)
+    numerator = np.exp(np.dot(W.T,train_data_bias.T))
+    print(W.T.shape)
+    print(train_data_bias.T.shape)
+    denominator = np.sum(np.exp(np.dot(W.T,train_data_bias.T)), axis=0)
+    #numerator = np.exp(np.dot(train_data_bias, W))
+    #denominator = np.sum(np.exp(np.dot(train_data_bias, W)),axis=0)
+    y_k = (np.divide(numerator,denominator)).T
     
     for i in range(n_data):
         #print("-----------------------y_k: ", y_k[i, :])
