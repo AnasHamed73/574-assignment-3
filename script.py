@@ -343,6 +343,26 @@ def svm_param_experiment(train_data, train_label, val_data, val_label, test_data
   plt.savefig("svm_varC.png")
   plt.show()
 
+def calc_errors(preds, true_labels, n_class):
+  misclass = np.zeros((n_class, 1))
+  true_labels_count = np.zeros((n_class, 1))
+  errors = np.zeros((n_class, 1))
+  
+  for i in range(preds.shape[0]):
+      lab = int(true_labels[i][0])
+      pred = int(preds[i][0])
+      if pred is not lab:
+          misclass[lab] += 1
+      true_labels_count[lab] += 1
+
+  for i in range(errors.shape[0]):
+      errors[i] = misclass[i][0] / true_labels_count[i][0]
+
+  return errors
+
+def print_errs(errs):
+    for i in range(errs.shape[0]):
+        print "error for ", i, ": ", errs[i][0] * 100, "%" 
 
 """
 Script for Logistic Regression
@@ -376,6 +396,11 @@ for i in range(n_class):
 
 # Find the accuracy on Training Dataset
 predicted_label = blrPredict(W, train_data)
+
+print "----------Training errors"
+train_err = calc_errors(predicted_label, train_label, n_class)
+print_errs(train_err)
+
 print('\n Training set Accuracy:' + str(100 * np.mean((predicted_label == train_label).astype(float))) + '%')
 
 # Find the accuracy on Validation Dataset
@@ -384,13 +409,18 @@ print('\n Validation set Accuracy:' + str(100 * np.mean((predicted_label == vali
 
 # Find the accuracy on Testing Dataset
 predicted_label = blrPredict(W, test_data)
+
+print "----------Test errors"
+test_err = calc_errors(predicted_label, test_label, n_class)
+print_errs(test_err)
+
 print('\n Testing set Accuracy:' + str(100 * np.mean((predicted_label == test_label).astype(float))) + '%')
 
 """
 Script for Support Vector Machine
 """
 
-print('\n\n--------------SVM-------------------\n\n')
+#print('\n\n--------------SVM-------------------\n\n')
 
 ### uncomment to run experiment where the best value for C was determined
 ### OR read the 'svm_experiemnt.log' file to see the output
@@ -404,6 +434,7 @@ predict_and_print_acc(clf, train_data, train_label, validation_data, validation_
 """
 Script for Extra Credit Part
 """
+print "\n\nMulticlass Logistic Regression"
 # FOR EXTRA CREDIT ONLY
 W_b = np.zeros((n_feature + 1, n_class))
 initialWeights_b = np.zeros((n_feature + 1, n_class))
@@ -415,6 +446,11 @@ W_b = nn_params.x.reshape((n_feature + 1, n_class))
 
 # Find the accuracy on Training Dataset
 predicted_label_b = mlrPredict(W_b, train_data)
+
+print "----------Training errors"
+train_err = calc_errors(predicted_label_b, train_label, n_class)
+print_errs(train_err)
+
 print('\n Training set Accuracy:' + str(100 * np.mean((predicted_label_b == train_label).astype(float))) + '%')
 
 # Find the accuracy on Validation Dataset
@@ -423,5 +459,10 @@ print('\n Validation set Accuracy:' + str(100 * np.mean((predicted_label_b == va
 
 # Find the accuracy on Testing Dataset
 predicted_label_b = mlrPredict(W_b, test_data)
+
+print "----------Test errors"
+test_err = calc_errors(predicted_label_b, test_label, n_class)
+print_errs(test_err)
+
 print('\n Testing set Accuracy:' + str(100 * np.mean((predicted_label_b == test_label).astype(float))) + '%')
 
